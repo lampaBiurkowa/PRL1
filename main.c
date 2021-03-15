@@ -59,8 +59,8 @@ int pop(deque* dequeue)
 {
 	if (dequeue -> end == NULL)
 	{
-		printf("Kolejka pusta - brak zdjecia wartosci (-1)\n");
-		return;
+		printf("Kolejka pusta - brak zdjecia wartosci (kod -1)\n");
+		return -1;
 	}
 
 	dqitem* addresToFree = dequeue -> end;
@@ -89,6 +89,19 @@ dqitem* getItemAt(deque* dequeue, int position)
 	return cur;
 }
 
+int getItemsCount(deque* dequeue)
+{
+	int count = 0;
+	dqitem* cur = dequeue -> front;
+	while (cur != NULL)
+	{
+		cur = cur -> next;
+		count++;
+	}
+
+	return count;
+}
+
 void removeQ(deque* dequeue, int position)
 {
 	dqitem* item = getItemAt(dequeue, position);
@@ -113,9 +126,25 @@ void removeQ(deque* dequeue, int position)
 
 void insert(deque* dequeue, int value, int position)
 {
+	if (dequeue -> front == NULL && position == 0)
+	{
+		push(dequeue, value);
+		return;
+	}
+
 	dqitem* item = getItemAt(dequeue, position);
 	if (item == NULL)
 	{
+		if (position == getItemsCount(dequeue))
+		{
+			dqitem* newItem = (dqitem*)malloc(sizeof(dqitem));
+			newItem -> value = value;
+			newItem -> next = NULL;
+			newItem -> prev = dequeue -> end;
+			dequeue -> end -> next = newItem;
+			dequeue -> end = newItem;
+			return;
+		}
 		printf("Kolejka ma za malo elementow\n");
 		return;
 	}
@@ -134,11 +163,22 @@ void insert(deque* dequeue, int value, int position)
 		dequeue -> end = newItem;
 }
 
+void handleWrongInput()
+{
+	printf("Bledna wartosc\n");
+	int n;
+	while ((n = getchar()) != EOF && n != '\n');
+}
+
 void handlePrint(deque *dequeue)
 {
 	printf("0 - normalnie, 1 - od konca\n");
 	int choice;
-	scanf_s("%i", &choice);
+	if (scanf_s("%i", &choice) != 1)
+	{
+		handleWrongInput();
+		return;
+	}
 	print(dequeue, choice);
 }
 
@@ -146,7 +186,11 @@ void handlePush(deque* dequeue)
 {
 	printf("Podaj wartosc\n");
 	int value;
-	scanf_s("%i", &value);
+	if (scanf_s("%i", &value) != 1)
+	{
+		handleWrongInput();
+		return;
+	}
 	push(dequeue, value);
 }
 
@@ -160,10 +204,18 @@ void handleInsert(deque* dequeue)
 {
 	printf("Podaj wartosc\n");
 	int value;
-	scanf_s("%i", &value);
+	if (scanf_s("%i", &value) != 1)
+	{
+		handleWrongInput();
+		return;
+	}
 	printf("Podaj indeks\n");
 	int index;
-	scanf_s("%i", &index);
+	if (scanf_s("%i", &index) != 1)
+	{
+		handleWrongInput();
+		return;
+	}
 	insert(dequeue, value, index);
 }
 
@@ -171,7 +223,11 @@ void handleRemove(deque* dequeue)
 {
 	printf("Podaj indeks\n");
 	int index;
-	scanf_s("%i", &index);
+	if (scanf_s("%i", &index) != 1)
+	{
+		handleWrongInput();
+		return;
+	}
 	removeQ(dequeue, index);
 }
 
@@ -190,7 +246,11 @@ int main(int argc, char **argv)
 		printf("5 - remove\n");
 		printf("0 - end\n");
 		int choice;
-		scanf_s("%i", &choice);
+		if (scanf_s("%i", &choice) != 1)
+		{
+			handleWrongInput();
+			continue;
+		}
 		switch (choice)
 		{
 		case 1:
@@ -213,5 +273,9 @@ int main(int argc, char **argv)
 		}
 	}
 		
+	dqitem* item = dequeue.front;
+	while (item != NULL)
+		free(item);
+
 	return 0;
 }
